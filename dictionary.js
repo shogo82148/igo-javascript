@@ -15,6 +15,78 @@ igo.ViterbiNode.makeBOSEOS = function() {
 	return new igo.ViterbiNode(0, 0, 0, 0, 0, 0, false);
 };
 
+igo.CharCategory = function(code2category, charcategory, bigendian) {
+	this.categories = igo.CharCategory.readCategories(charcategory, bigendian);
+	var fmis = new igo.ArrayBufferStream(code2category, bigendian);
+	this.char2id = fmis.getIntArray(fmis.size() / 4 / 2);
+	this.eqlMasks = fmis.getIntArray(fmis.size() / 4 / 2);
+};
+
+igo.CharCategory.prototype = {
+	category: function(code) {
+		return this.categories[this.char2id.get(code.charCodeAt(0))];
+	},
+	isCompatible: function(code1, code2) {
+		return (this.eqlMasks.get(code1.charCodeAt(0)) &
+			this.eqlMasks.get(code2.charCodeAt(0))) != 0;
+	},
+};
+
+igo.CharCategory.readCategories = function(buffer, bigendian) {
+	var data = igo.getIntArray(buffer, bigendian);
+	var size = buffer.byteLength / 4 / 4;
+	var ary = [];
+	for(var i=0;i<size;i++) {
+		ary.push(new igo.Category(data.get(i*4), data.get(i*4+1),
+			data.get(i*4+2)==1, data.get(i*4+3)==1));
+	}
+	return ary;
+};
+
+igo.Category = function(i, l, iv, g) {
+	this.id = i;
+	this.length = l;
+	this.invoke = iv;
+	this.group = g;
+};
+
+//未知語の検索を行うクラス
+igo.Unknown = function(category) {
+	this.category = category;
+	this.spaceId = this.category.category(' ').id;
+};
+
+igo.Unknown.prototype.search = function(text, start, wdic, callback) {
+	var category = this.category;
+	var ch = text[start];
+	var ct = category.category(ch);
+	var length = text.length;
+	
+	if(!callback.isEmpty() && !ct.invoke) {
+		return ;
+	}
+	
+	var isSpace = ct.id == this.spaceId;
+	var limit = Math.min(length, ct.length + start);
+	for(var i=start; i<limit; i++) {
+		wdic.searchFromTrieId(ct.id, start,
+			(i-start)+1, isSpace, callback);
+		if(i+1!=limit && !category.isCompatible(ch, text[i+1])) {
+			return;
+		}
+	}
+	
+	if(ct.group && limit < length) {
+		for(var i=limit; i<length; i++) {
+			if(!category.isCompatible(ch, text[i])) {
+				wdic.searchFromTrieId(ct.id, start, i-start, isSpace, callback);
+				return;
+			}
+		}
+		wdic.searchFromTrieId(ct.id, start, length-start, isSpace, callback);
+	}
+};
+
 //形態素の連接コスト表を扱うクラス
 igo.Matrix = function(buffer, bigendian) {
 	fmis = new igo.ArrayBufferStream(buffer, bigendian);
@@ -65,6 +137,18 @@ igo.WordDic.prototype = {
 		}
 		this.trie.eachCommonPrefix(text, start, fn);
 	},
+	
+	searchFromTrieId: function(trieId, start, wordLength, isSpace, callback) {
+		var costs = this.costs;
+		var leftIds = this.leftIds;
+		var rightIds = this.rightIds;
+		var end = this.indices.get(trieId + 1);
+		for(var i=this.indices.get(trieId); i<end; i++) {
+			callback(new igo.ViterbiNode(i, start, wordLength, costs.get(i),
+					leftIds.get(i), rightIds.get(i), isSpace));
+		}
+	},
+	
 	wordData: function(wordId) {
 		var res = Array();
 		var start = this.dataOffsets.get(wordId);

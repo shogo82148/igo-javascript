@@ -42,17 +42,32 @@ igo = {};
 <script>
 $(function() {
 	var tagger = undefined;
+	var charcategory, code2category;
 	var word2id, worddat, wordary, wordinf, matrix;
 	
 	function complete() {
-		if(!(word2id && worddat && wordary && wordinf && matrix)) return;
+		if(!(charcategory && code2category && word2id && worddat && wordary && wordinf && matrix)) return;
+		var category = new igo.CharCategory(code2category, charcategory);
 		var wdc = new igo.WordDic(word2id, worddat, wordary, wordinf);
+		var unk = new igo.Unknown(category);
 		var mtx = new igo.Matrix(matrix);
-		tagger = new igo.Tagger(wdc, undefined, mtx);
+		tagger = new igo.Tagger(wdc, unk, mtx);
 		
 		$('#loading').hide();
 		$('#inputform').show();
 	}
+	
+	igo.getServerFileToArrayBufffer('./ipadic/char.category', function(buffer) {
+		charcategory = buffer;
+		complete();
+		$('<div>文字種一覧のダウンロード完了</div>').appendTo($('#loading'));
+	});
+	
+	igo.getServerFileToArrayBufffer('./ipadic/code2category', function(buffer) {
+		code2category = buffer;
+		complete();
+		$('<div>文字-文字種対応表のダウンロード完了</div>').appendTo($('#loading'));
+	});
 	
 	var test = igo.getServerFileToArrayBufffer('./ipadic/word2id', function(buffer) {
 		word2id = buffer;
@@ -62,6 +77,7 @@ $(function() {
 	igo.getServerFileToArrayBufffer('./ipadic/word.dat', function(buffer) {
 		worddat = buffer;
 		complete();
+		$('<div>単語のダウンロード完了</div>').appendTo($('#loading'));
 	});
 	igo.getServerFileToArrayBufffer('./ipadic/word.ary.idx', function(buffer) {
 		wordary = buffer;
