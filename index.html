@@ -39,14 +39,33 @@ igo = {};
 <script src="dictionary.js"></script>
 <script src="tagger.js"></script>
 
+<script src="zip/zip.js"></script>
+<script src="zip/sjis.js"></script>
+<script src="zip/jsinflate.js"></script>
+
 <script>
 $(function() {
 	var tagger = undefined;
-	var charcategory, code2category;
-	var word2id, worddat, wordary, wordinf, matrix;
 	
-	function complete() {
-		if(!(charcategory && code2category && word2id && worddat && wordary && wordinf && matrix)) return;
+	function inflate2array(file) {
+		var data = new ArrayBuffer(file.size);
+		var buffer = new Uint8Array(data);
+		var result = file.inflate();
+		for(var i=0;i<file.size;i++) {
+			buffer[i] = result.charAt(i) & 0xFF;
+		}
+		return data;
+	}
+	
+	Zip.inflate_file("ipadic.zip", function (zip) {
+		/*var charcategory = inflate2array(zip.files['char.category']);
+		var code2category = inflate2array(zip.files['code2category']);*/
+		var word2id = inflate2array(zip.files['word2id']);
+		/*var worddat = inflate2array(zip.files['word.dat']);
+		var wordary = inflate2array(zip.files['word.ary.idx']);
+		var wordinf = inflate2array(zip.files['word.inf']);
+		var matrix = inflate2array(zip.files['matrix.bin']);*/
+		
 		var category = new igo.CharCategory(code2category, charcategory);
 		var wdc = new igo.WordDic(word2id, worddat, wordary, wordinf);
 		var unk = new igo.Unknown(category);
@@ -55,44 +74,6 @@ $(function() {
 		
 		$('#loading').hide();
 		$('#inputform').show();
-	}
-	
-	igo.getServerFileToArrayBufffer('./ipadic/char.category', function(buffer) {
-		charcategory = buffer;
-		complete();
-		$('<div>文字種一覧のダウンロード完了</div>').appendTo($('#loading'));
-	});
-	
-	igo.getServerFileToArrayBufffer('./ipadic/code2category', function(buffer) {
-		code2category = buffer;
-		complete();
-		$('<div>文字-文字種対応表のダウンロード完了</div>').appendTo($('#loading'));
-	});
-	
-	var test = igo.getServerFileToArrayBufffer('./ipadic/word2id', function(buffer) {
-		word2id = buffer;
-		complete();
-		$('<div>単語ID辞書のダウンロード完了</div>').appendTo($('#loading'));
-	});
-	igo.getServerFileToArrayBufffer('./ipadic/word.dat', function(buffer) {
-		worddat = buffer;
-		complete();
-		$('<div>単語のダウンロード完了</div>').appendTo($('#loading'));
-	});
-	igo.getServerFileToArrayBufffer('./ipadic/word.ary.idx', function(buffer) {
-		wordary = buffer;
-		complete();
-		$('<div>単語インデックスのダウンロード完了</div>').appendTo($('#loading'));
-	});
-	igo.getServerFileToArrayBufffer('./ipadic/word.inf', function(buffer) {
-		wordinf = buffer;
-		complete();
-		$('<div>単語情報のダウンロード完了</div>').appendTo($('#loading'));
-	});
-	igo.getServerFileToArrayBufffer('./ipadic/matrix.bin', function(buffer) {
-		matrix = buffer;
-		complete();
-		$('<div>隣接コストのダウンロード完了</div>').appendTo($('#loading'));
 	});
 	
 	$('#morph').click(function() {
