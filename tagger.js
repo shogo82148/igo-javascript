@@ -41,10 +41,14 @@ igo.Tagger.prototype = {
 		var fn = function(vn) {
 			ml.call(vn);
 		};
+		fn.isEmpty = function() {
+			return ml.isEmpty();
+		};
 		for(var i=0; i<length; i++) {
 			if(!nodesAry[i]) continue;
 			ml.set(i);
 			wdc.search(text, i, fn) //単語辞書から形態素を検索
+			if(unk) unk.search(text, i, wdc, fn); //未知語辞書から形態素を検索
 		}
 		
 		var cur = this.setMincostNode(igo.ViterbiNode.makeBOSEOS(),
