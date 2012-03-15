@@ -39,32 +39,20 @@ igo = {};
 <script src="dictionary.js"></script>
 <script src="tagger.js"></script>
 
-<script src="zip/zip.js"></script>
-<script src="zip/sjis.js"></script>
-<script src="zip/jsinflate.js"></script>
+<script src="zip.min.js"></script>
 
 <script>
 $(function() {
 	var tagger = undefined;
 	
-	function inflate2array(file) {
-		var data = new ArrayBuffer(file.size);
-		var buffer = new Uint8Array(data);
-		var result = file.inflate();
-		for(var i=0;i<file.size;i++) {
-			buffer[i] = result.charAt(i) & 0xFF;
-		}
-		return data;
-	}
-	
 	Zip.inflate_file("ipadic.zip", function (zip) {
-		/*var charcategory = inflate2array(zip.files['char.category']);
-		var code2category = inflate2array(zip.files['code2category']);*/
-		var word2id = inflate2array(zip.files['word2id']);
-		/*var worddat = inflate2array(zip.files['word.dat']);
-		var wordary = inflate2array(zip.files['word.ary.idx']);
-		var wordinf = inflate2array(zip.files['word.inf']);
-		var matrix = inflate2array(zip.files['matrix.bin']);*/
+		var charcategory = zip.files['char.category'].inflate();
+		var code2category = zip.files['code2category'].inflate();
+		var word2id = zip.files['word2id'].inflate();
+		var worddat = zip.files['word.dat'].inflate();
+		var wordary = zip.files['word.ary.idx'].inflate();
+		var wordinf = zip.files['word.inf'].inflate();
+		var matrix = zip.files['matrix.bin'].inflate();
 		
 		var category = new igo.CharCategory(code2category, charcategory);
 		var wdc = new igo.WordDic(word2id, worddat, wordary, wordinf);

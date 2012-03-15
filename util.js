@@ -114,7 +114,11 @@ igo.CharArray.prototype = {
 
 //ArrayBufferを読み取るストリーム
 igo.ArrayBufferStream = function(buffer, bigendian) {
-	this.buffer = new Uint8Array(buffer);
+	if(buffer instanceof ArrayBuffer) {
+		this.buffer = new Uint8Array(buffer);
+	} else {
+		this.buffer = buffer;
+	}
 	this.bigendian = bigendian;
 	this.pos = 0;
 }
