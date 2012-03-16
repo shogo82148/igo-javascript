@@ -22,7 +22,6 @@ igo.Tagger.prototype = {
 			var feature = this.wdc.wordData(vn.wordId).join('');
 			result.push(new igo.Morpheme(surface, feature, vn.start));
 			vn = vn.prev;
-			console.log(surface, feature);
 		}
 		return result;
 	},

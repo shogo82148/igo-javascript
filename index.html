@@ -43,34 +43,33 @@ igo = {};
 
 <script>
 $(function() {
-	var tagger = undefined;
+	var worker = new Worker('worker.js');
 	
-	Zip.inflate_file("ipadic.zip", function (zip) {
-		var charcategory = zip.files['char.category'].inflate();
-		var code2category = zip.files['code2category'].inflate();
-		var word2id = zip.files['word2id'].inflate();
-		var worddat = zip.files['word.dat'].inflate();
-		var wordary = zip.files['word.ary.idx'].inflate();
-		var wordinf = zip.files['word.inf'].inflate();
-		var matrix = zip.files['matrix.bin'].inflate();
-		
-		var category = new igo.CharCategory(code2category, charcategory);
-		var wdc = new igo.WordDic(word2id, worddat, wordary, wordinf);
-		var unk = new igo.Unknown(category);
-		var mtx = new igo.Matrix(matrix);
-		tagger = new igo.Tagger(wdc, unk, mtx);
-		
-		$('#loading').hide();
-		$('#inputform').show();
+	var BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.BlobBuilder
+	
+	igo.getServerFileToArrayBufffer("ipadic.zip", function(buffer) {
+		$('#loading').text('辞書を展開中・・・');
+		var bb = new BlobBuilder();
+		bb.append(buffer);
+		worker.postMessage({dic: bb.getBlob()});
+	});
+	
+	worker.addEventListener("message", function(event) {
+		if(event.data.event=="load") {
+			$('#loading').hide();
+			$('#inputform').show();
+		} else if(event.data.event=="result") {
+			var nodes = event.data.morpheme;
+			var result = '';
+			for(var i=0;i<nodes.length;i++) {
+				result += '<div class="morph"><div class="surface">' + nodes[i].surface + '</div><div class="feature">' + nodes[i].feature + '</div></div>'
+			}
+			$('#result').html(result);
+		}
 	});
 	
 	$('#morph').click(function() {
-		var nodes = tagger.parse($('#input').val());
-		var result = '';
-		for(var i=0;i<nodes.length;i++) {
-			result += '<div class="morph"><div class="surface">' + nodes[i].surface + '</div><div class="feature">' + nodes[i].feature + '</div></div>'
-		}
-		$('#result').html(result);
+		worker.postMessage({text: $('#input').val()});
 	});
 });
 </script>
@@ -152,7 +151,7 @@ div.feature {
 
     <h2>試してみる</h2>
 	<div id="loading">
-	辞書をダウンロード中・・・しばらくお待ち下さい。
+	辞書をダウンロード中・・・
 	</div>
 	<div id="inputform">
 	<div>形態素解析したいテキストを入力してボタンを押してね</div>
