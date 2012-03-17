@@ -14,13 +14,28 @@ igo.Tagger = function(wdc, unk, mtx) {
 };
 
 igo.Tagger.prototype = {
-	parse: function(text) {
-		var result = [];
+	parse: function(text, result) {
+		if(!result) {
+			result = [];
+		}
 		var vn = this.parseImpl(text);
 		while(vn) {
 			var surface = text.substring(vn.start, vn.start + vn.length);
 			var feature = this.wdc.wordData(vn.wordId).join('');
 			result.push(new igo.Morpheme(surface, feature, vn.start));
+			vn = vn.prev;
+		}
+		return result;
+	},
+	
+	wakati: function(text, result) {
+		if(!result) {
+			result = [];
+		}
+		var vn = this.parseImpl(text);
+		while(vn) {
+			var surface = text.substring(vn.start, vn.start + vn.length);
+			result.push(surface);
 			vn = vn.prev;
 		}
 		return result;
