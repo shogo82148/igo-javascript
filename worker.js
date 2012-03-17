@@ -1,5 +1,5 @@
 igo = {};
-importScripts("util.js", "trie.js", "dictionary.js", "tagger.js", "zip.min.js");
+importScripts("util.js", "trie.js", "dictionary.js", "tagger.js", "zip.min.js", "jsheap.js");
 
 var tagger;
 

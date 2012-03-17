@@ -46,8 +46,8 @@ igo.Tagger.prototype = {
 		var nodesAry = new Array(length + 1);
 		nodesAry[0] = [igo.ViterbiNode.makeBOSEOS()];
 		
-		var wdc = this.wdc
-		var unk = this.unk
+		var wdc = this.wdc;
+		var unk = this.unk;
 		var tagger = this;
 		var ml = new igo.MakeLattice(nodesAry, function(vn, prevs) {
 			return tagger.setMincostNode(vn, prevs);
@@ -79,15 +79,15 @@ igo.Tagger.prototype = {
 	},
 	
 	setMincostNode: function(vn, prevs) {
-		var mtx = this.mtx
-		var leftId = vn.leftId
+		var mtx = this.mtx;
+		var leftId = vn.leftId;
 		var f = prevs[0];
 		vn.prev = prevs[0];
 		var minCost = f.cost + mtx.linkCost(f.rightId, leftId);
 		
 		for(var i=1; i<prevs.length; i++) {
 			var p = prevs[i];
-			var cost = p.cost + mtx.linkCost(p.rightId, leftId)
+			var cost = p.cost + mtx.linkCost(p.rightId, leftId);
 			if(cost < minCost) {
 				minCost = cost;
 				vn.prev = p
