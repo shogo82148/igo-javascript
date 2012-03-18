@@ -2,7 +2,9 @@
 //Viterbiアルゴリズムで使用されるノード
 igo.ViterbiNode = function(wordId, start, length, cost, leftId, rightId, isSpace) {
 	this.cost = cost; //始点からノードまでの総コスト
+	this.nodecost = cost; //ノード単体のコスト
 	this.prev = undefined; //コスト最小の前方のノードへのリンク
+	this.prevs = []; //前方のノードへのリンク
 	this.wordId = wordId; //単語ID
 	this.start = start; //入力テキスト内での形態素の開始位置
 	this.length = length; //形態素の表層形の長さ(文字数)

@@ -4,7 +4,8 @@ importScripts("util.js", "trie.js", "dictionary.js", "tagger.js", "zip.min.js", 
 var tagger;
 
 addEventListener("message", function (event) {
-	if(event.data.dic) {
+	var method = event.data.method;
+	if(method=='setdic') {
 		var reader = new FileReaderSync();
 		zip = Zip.inflate(
 			new Uint8Array(reader.readAsArrayBuffer(event.data.dic))
@@ -25,9 +26,26 @@ addEventListener("message", function (event) {
 		tagger = new igo.Tagger(wdc, unk, mtx);
 		
 		postMessage({event: "load"});
-	}
-	
-	if(event.data.text) {
-		postMessage({event: "result", morpheme: tagger.parse(event.data.text)});
+	} else if(method=='parse') {
+		postMessage({
+			method: method,
+			event: "result",
+			text: event.data.text,
+			morpheme: tagger.parse(event.data.text),
+		});
+	} else if(method=='wakati') {
+		postMessage({
+			method: method,
+			event: "result",
+			text: event.data.text,
+			morpheme: tagger.wakati(event.data.text),
+		});
+	} else if(method=='parseNBest') {
+		postMessage({
+			method: method,
+			event: "result",
+			text: event.data.text,
+			morpheme: tagger.parseNBest(event.data.text, event.data.best),
+		});
 	}
 });

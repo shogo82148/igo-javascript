@@ -51,25 +51,29 @@ $(function() {
 		$('#loading').text('辞書を展開中・・・');
 		var bb = new BlobBuilder();
 		bb.append(buffer);
-		worker.postMessage({dic: bb.getBlob()});
+		worker.postMessage({method: 'setdic', dic: bb.getBlob()});
 	});
 	
 	worker.addEventListener("message", function(event) {
 		if(event.data.event=="load") {
 			$('#loading').hide();
 			$('#inputform').show();
-		} else if(event.data.event=="result") {
-			var nodes = event.data.morpheme;
+		} else if(event.data.event=="result" && event.data.method=="parseNBest") {
+			var nodeslist = event.data.morpheme;
 			var result = '';
-			for(var i=0;i<nodes.length;i++) {
-				result += '<div class="morph"><div class="surface">' + nodes[i].surface + '</div><div class="feature">' + nodes[i].feature + '</div></div>'
+			for(var j=0;j<nodeslist.length;++j) {
+				var nodes = nodeslist[j];
+				for(var i=0;i<nodes.length;i++) {
+					result += '<div class="morph"><div class="surface">' + nodes[i].surface + '</div><div class="feature">' + nodes[i].feature + '</div></div>'
+				}
+				result += '<div>EOS</div>'
 			}
 			$('#result').html(result);
 		}
 	});
 	
 	$('#morph').click(function() {
-		worker.postMessage({text: $('#input').val()});
+		worker.postMessage({method: 'parseNBest', text: $('#input').val(), best: 3});
 	});
 });
 </script>

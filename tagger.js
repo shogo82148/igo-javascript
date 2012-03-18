@@ -18,7 +18,7 @@ igo.Tagger.prototype = {
 		if(!result) {
 			result = [];
 		}
-		var vn = this.parseImpl(text);
+		var vn = this.getBestPath(this.parseImpl(text));
 		while(vn) {
 			var surface = text.substring(vn.start, vn.start + vn.length);
 			var feature = this.wdc.wordData(vn.wordId).join('');
@@ -27,12 +27,34 @@ igo.Tagger.prototype = {
 		}
 		return result;
 	},
+
+	parseNBest: function(text, best, results) {
+		if(!results) {
+			results = [];
+		}
+		var vns = this.getNBestPath(this.parseImpl(text), best);
+		for(var i=0;i<vns.length;++i) {
+			var n = vns[i];
+			var result = [];
+			while(n) {
+				var vn = n.node;
+				if(vn.wordId!=0) {
+					var surface = text.substring(vn.start, vn.start + vn.length);
+					var feature = this.wdc.wordData(vn.wordId).join('');
+					result.push(new igo.Morpheme(surface, feature, vn.start));
+				}
+				n = n.next;
+			}
+			results.push(result);
+		}
+		return results;
+	},
 	
 	wakati: function(text, result) {
 		if(!result) {
 			result = [];
 		}
-		var vn = this.parseImpl(text);
+		var vn = this.getBestPath(this.parseImpl(text));
 		while(vn) {
 			var surface = text.substring(vn.start, vn.start + vn.length);
 			result.push(surface);
@@ -64,10 +86,14 @@ igo.Tagger.prototype = {
 			wdc.search(text, i, fn) //単語辞書から形態素を検索
 			if(unk) unk.search(text, i, wdc, fn); //未知語辞書から形態素を検索
 		}
-		
-		var cur = this.setMincostNode(igo.ViterbiNode.makeBOSEOS(),
-				nodesAry[length]).prev;
-		
+
+		nodesAry[length+1] = [this.setMincostNode(igo.ViterbiNode.makeBOSEOS(),
+				nodesAry[length])];
+		return nodesAry;
+	},
+
+	getBestPath: function(nedesAry) {
+		var cur = nedesAry[nedesAry.length-1][0].prev;
 		var head = undefined;
 		while(cur.prev) {
 			var tmp = cur.prev;
@@ -76,6 +102,36 @@ igo.Tagger.prototype = {
 			cur = tmp;
 		}
 		return head;
+	},
+	
+	getNBestPath: function(nedesAry, best) {
+		var mtx = this.mtx;
+		var bests = [];
+		var heap = new jsheap(function(a, b) {
+			return a.predict_cost < b.predict_cost;
+		});
+		var eos = nedesAry[nedesAry.length-1][0];
+		heap.push({node:eos, cost:0, predict_cost: eos.cost, next:undefined});
+		while(!heap.empty() && bests.length < best) {
+			var n = heap.top(); heap.pop();
+			if(n.node.wordId==0 && n.next) {
+				bests.push(n);
+				continue;
+			}
+			
+			var leftId = n.node.leftId;
+			var prevs = n.node.prevs;
+			for(var i=0;i<prevs.length;++i) {
+				var cost = n.cost + mtx.linkCost(prevs[i].rightId, leftId) + n.node.nodecost;
+				heap.push({
+					node: prevs[i],
+					cost: cost,
+					predict_cost: cost + prevs[i].cost,
+					next: n
+				});
+			}
+		}
+		return bests;
 	},
 	
 	setMincostNode: function(vn, prevs) {
@@ -93,6 +149,7 @@ igo.Tagger.prototype = {
 				vn.prev = p
 			}
 		}
+		vn.prevs = prevs;
 		vn.cost += minCost
 		return vn;
 	},
