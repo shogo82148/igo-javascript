@@ -1,7 +1,7 @@
 {
-  "name": "igo-javascript",
+  "name": "shogo8214-test",
   "version": "0.0.1",
   "dependencies": {
     "express": "latest"
-  },
+  }
 }
