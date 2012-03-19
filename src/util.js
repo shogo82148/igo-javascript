@@ -27,7 +27,7 @@ igo.getServerFileToArrayBufffer = function (url, successCallback) {
 igo.IntArray = function (buffer, pos, elementCount, bigendian) {
     this.buffer = buffer;
     this.pos = pos;
-    this.elementCount = elementCount;
+    this.length = elementCount;
     this.bigendian = bigendian;
 };
 
@@ -66,7 +66,7 @@ igo.IntArray.prototype = {
 igo.ShortArray = function (buffer, pos, elementCount, bigendian) {
     this.buffer = buffer;
     this.pos = pos;
-    this.elementCount = elementCount;
+    this.length = elementCount;
     this.bigendian = bigendian;
 }
 
@@ -101,7 +101,7 @@ igo.ShortArray.prototype = {
 igo.CharArray = function(buffer, pos, elementCount, bigendian) {
     this.buffer = buffer;
     this.pos = pos;
-    this.elementCount = elementCount;
+    this.length = elementCount;
     this.bigendian = bigendian;
 };
 
@@ -114,7 +114,7 @@ igo.CharArray.prototype = {
 
 //ArrayBufferを読み取るストリーム
 igo.ArrayBufferStream = function(buffer, bigendian) {
-    if(buffer instanceof ArrayBuffer) {
+    if(typeof buffer === 'ArrayBuffer') {
 	this.buffer = new Uint8Array(buffer);
     } else {
 	this.buffer = buffer;
@@ -164,9 +164,11 @@ igo.ArrayBufferStream.prototype = {
 };
 
 igo.getIntArray = function(buffer, bigendian) {
-    return (new igo.ArrayBufferStream(buffer, bigendian)).getIntArray();
+    var stream = new igo.ArrayBufferStream(buffer, bigendian);
+    return stream.getIntArray(stream.size()/4);
 };
 
 igo.getCharArray = function(buffer, bigendian) {
-    return (new igo.ArrayBufferStream(buffer, bigendian)).getCharArray();
+    var stream = new igo.ArrayBufferStream(buffer, bigendian);
+    return stream.getCharArray(stream.size()/2);
 };
