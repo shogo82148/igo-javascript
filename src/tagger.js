@@ -1,3 +1,5 @@
+var igo = typeof exports === 'undefined' ? {} : exports;
+
 //形態素クラス
 igo.Morpheme = function(surface, feature, start) {
     this.surface = surface; //形態素の表層形

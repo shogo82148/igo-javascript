@@ -48,7 +48,7 @@ igo.KeyStream.prototype = {
     startsWith: function(prefix, beg, length) {
 	var cur = this.cur;
 	var s = this.s;
-	if(self.len - cur < length) {
+	if(this.len - cur < length) {
 	    return false;
 	}
 	return s.substring(cur, cur+length) == prefix.substring(beg, beg + length);

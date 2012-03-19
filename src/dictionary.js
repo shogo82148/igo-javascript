@@ -35,7 +35,7 @@ igo.CharCategory.prototype = {
 
 igo.CharCategory.readCategories = function(buffer, bigendian) {
     var data = igo.getIntArray(buffer, bigendian);
-    var size = buffer.byteLength / 4 / 4;
+    var size = data.length / 4;
     var ary = [];
     for(var i=0;i<size;i++) {
 	ary.push(new igo.Category(data.get(i*4), data.get(i*4+1),
