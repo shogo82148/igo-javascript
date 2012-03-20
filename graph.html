@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+
+  <title>shogo82148/igo-javascript @ GitHub</title>
+<style type="text/css">
+<!--
+#inputform {
+	display:none;
+}
+.result {
+	width: 100%;
+	height: 100%;
+}
+
+div.morph {
+	padding: 2px;
+	text-align:center;
+	border: solid black 1px;
+	position: absolute;
+}
+div.surface {
+}
+div.feature {
+	font-size:xx-small;
+}
+#input {
+	width:400px;
+}
+-->
+</style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="build/igo.min.js"></script>
+<script src="lib/zip.min.js"></script>
+<script src="igo"></script>
+
+<script>
+$(function() {
+    function event(data) {
+        if(data.event=='downloaded') {
+            $('#loading').text('辞書を展開中・・・');
+        } else if(data.event=='load') {
+            $('#loading').hide();
+            $('#inputform').show();
+        } else if(data.event=="result" && data.method=="all") {
+            $('#result').empty();
+            var nodes = data.morpheme;
+            var result = '';
+            var counts = new Array(data.text.length);
+            var i;
+            
+            for(i=0;i<nodes.length;i++) {
+                counts[i] = 0;
+            }
+            for(i=0;i<nodes.length;i++) {
+                var surface = $('<div>').text(nodes[i].surface).addClass('surface');
+                var feature = $('<div>').text(nodes[i].feature.split(',').slice(0,3).join(',')).addClass('feature');
+                var div = $('<div>').append(surface).append(feature).addClass('morph').appendTo($('#result'));
+                div.css({top: counts[nodes[i].start] * 50 + 100 + 'px', left: 100 * nodes[i].start + 100 + 'px'});
+                counts[nodes[i].start]++;
+            }
+        } else if(data.event=="error") {
+            $('#result').text('エラー発生');
+        }
+    }
+
+    var post;
+    if(window.useNodeJS) {
+        event({event: 'load'});
+        post = function(data) {
+            $.ajax(
+                {
+                    url: 'igo',
+                    data: data,
+                    success: function(data, datatype) {event(data);},
+                    error: function() {event({event:'error'});}
+                }
+            );
+        }
+    } else {
+        var BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.BlobBuilder;
+        var worker = new Worker('web.js');
+        igo.getServerFileToArrayBufffer("ipadic.zip", function(buffer) {
+            event({event: 'downloaded'});
+            var bb = new BlobBuilder();
+            bb.append(buffer);
+            worker.postMessage({method: 'setdic', dic: bb.getBlob()});
+	});
+        post = function(data) {
+            worker.postMessage(data);
+        }
+	worker.addEventListener("message", function(e) {event(e.data);});
+	worker.addEventListener("error", function() {event({event:"error"});});
+    }
+
+    $('#morph').click(function() {
+        post({method: 'all', text: $('#input').val()});
+    });
+});
+</script>
+
+</head>
+
+<body>
+
+	<div id="loading">
+	辞書をダウンロード中・・・
+	</div>
+	<div id="inputform">
+	<div>形態素解析したいテキストを入力してボタンを押してね</div>
+	<input type="text" id="input" value="">
+	<input type="button" id="morph" value="形態素解析">
+	<div id="result">
+	</div>
+	</div>
+
+</body>
+</html>

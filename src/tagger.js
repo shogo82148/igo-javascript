@@ -175,7 +175,7 @@ igo.MakeLattice.prototype = {
     set: function(i) {
 	this.i = i;
 	this.prevs = this.nodesAry[i];
-	this.nodesAry[i] = undefined;
+	//this.nodesAry[i] = undefined;
 	this.empty = true;
     },
     

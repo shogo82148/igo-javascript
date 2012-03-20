@@ -45,6 +45,31 @@ function igo_request(data) {
 	    text: text,
 	    morpheme: tagger.parseNBest(text, best)
 	};
+    } else if(method=='all') {
+        var nodelist = tagger.parseImpl(text);
+        var morpheme = [];
+        for(var i=0;i<nodelist.length;++i) {
+            if(typeof nodelist[i] === "undefined") continue;
+            for(var j=0;j<nodelist[i].length;++j) {
+                var vn = nodelist[i][j];
+                if(vn.wordId==0) continue;
+                morpheme.push(
+                    {
+                        surface: text.substring(vn.start, vn.start + vn.length),
+                        feature: tagger.wdc.wordData(vn.wordId).join(''),
+                        start: vn.start,
+                        length: vn.length,
+                        cost: vn.cost
+                    }
+                );
+            }
+        }
+        return {
+            method: method,
+            event: "result",
+            text: text,
+            morpheme: morpheme
+        }
     }
 
     return null;
