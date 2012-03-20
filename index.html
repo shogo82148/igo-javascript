@@ -73,7 +73,7 @@ $(function() {
         }
     } else {
         var BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.BlobBuilder;
-        var worker = new Worker('worker.js');
+        var worker = new Worker('web.js');
         igo.getServerFileToArrayBufffer("ipadic.zip", function(buffer) {
             event({event: 'downloaded'});
             var bb = new BlobBuilder();
@@ -84,6 +84,7 @@ $(function() {
             worker.postMessage(data);
         }
 	worker.addEventListener("message", function(e) {event(e.data);});
+	worker.addEventListener("error", function() {event({event:"error"});});
     }
 
     $('#morph').click(function() {

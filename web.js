@@ -1,13 +1,12 @@
-var express = require('express');
-var fs = require('fs');
-var igo = require('./build/igo.min');
-var app = express.createServer();
+var isWebWorker = typeof require === 'undefined';
+
+var dicfiles = ['char.category', 'code2category', 'word2id', 'word.dat', 'word.ary.idx', 'word.inf', 'matrix.bin'];
+var tagger;
 
 function loadTagger(dicdir) {
-    var dicfiles = ['char.category', 'code2category', 'word2id', 'word.dat', 'word.ary.idx', 'word.inf', 'matrix.bin'];
     var files = new Array();
     for(var i=0;i<dicfiles.length;++i) {
-	files[dicfiles[i]] = fs.readFileSync(dicdir + '/' + dicfiles[i]);
+	files[dicfiles[i]] = loadFile(dicdir, dicfiles[i]);
     }
 
     var category = new igo.CharCategory(files['code2category'], files['char.category']);
@@ -17,44 +16,86 @@ function loadTagger(dicdir) {
     return new igo.Tagger(wdc, unk, mtx);
 }
 
-var tagger = loadTagger('./ipadic');
+function igo_request(data) {
+    var method = data.method;
+    var text = data.text;
+    var best = data.best;
 
-app.use(express.bodyParser());
-app.use(express.static(__dirname, { maxAge: 356*24*60*60*1000 }));
-
-function igo_parse(req, res) {
-    var method = req.param('method');
-    var text = req.param('text');
-    var best = req.param('best');
-    var ret = 'var useNodeJS = true;';
-
-    if(method=='parse') {
-	ret = {
+    if(method=='setdic') {
+	tagger = loadTagger(data.dic);
+	return {event: 'load'};
+    } if(method=='parse') {
+	return {
 	    method: method,
 	    event: "result",
 	    text: text,
 	    morpheme: tagger.parse(text)
 	};
     } else if(method=='wakati') {
-	ret = {
+	return {
 	    method: method,
 	    event: "result",
 	    text: text,
 	    morpheme: tagger.wakati(text)
 	};
     } else if(method=='parseNBest') {
-	ret = {
+	return {
 	    method: method,
 	    event: "result",
 	    text: text,
 	    morpheme: tagger.parseNBest(text, best)
 	};
     }
-    res.send(ret);
+
+    return null;
 }
 
-app.get('/igo', igo_parse);
-app.post('/igo', igo_parse);
+if(isWebWorker) {
+    // for WebWorker
+    importScripts("build/igo.min.js", "lib/zip.min.js");
+    var loadFile = function(dicdir, name) {
+	return dicdir.files[name].inflate();
+    };
+    var onmessage = function(event) {
+	var dataclass = function(){};
+	dataclass.prototype = event.data;
+	var data = new dataclass();
 
-var port = process.env.PORT || 3000;
-app.listen(port);
+	if(data.dic) {
+	    var reader = new FileReaderSync();
+	    data.dic = Zip.inflate(
+		new Uint8Array(reader.readAsArrayBuffer(data.dic))
+	    );
+	}
+
+	var res = igo_request(data);
+	if(res) {
+	    postMessage(res);
+	}
+    };
+    addEventListener("message", onmessage);
+} else {
+    // for Node.js
+    var express = require('express');
+    var fs = require('fs');
+    var igo = require('./build/igo.min');
+    var app = express.createServer();
+
+    var loadFile = function(dicdir, name) {
+	return fs.readFileSync(dicdir + '/' + name);
+    };
+    igo_request({method: 'setdic', dic: './ipadic'});
+
+    app.use(express.bodyParser());
+    app.use(express.static(__dirname, { maxAge: 356*24*60*60*1000 }));
+
+    app.get('/igo', function(req, res) {
+		res.send(igo_request(req.query)||'var useNodeJS = true;');
+	    });
+    app.post('/igo', function(req, res) {
+		 res.send(igo_request(req.body)||'var useNodeJS = true;');
+	     });
+
+    var port = process.env.PORT || 3000;
+    app.listen(port);
+}
