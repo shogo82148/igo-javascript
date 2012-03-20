@@ -19,10 +19,42 @@ function loadTagger(dicdir) {
 
 var tagger = loadTagger('./ipadic');
 
-app.get('/', function(req, res) {
-	    var text = fs.readFileSync('./web.js', 'utf-8');
-	    res.send('Hello World' + tagger.wakati('node.jsで形態素解析をしてみるテスト'));
-	});
- 
+app.use(express.bodyParser());
+app.use(express.static(__dirname, { maxAge: 356*24*60*60*1000 }));
+
+function igo_parse(req, res) {
+    var method = req.param('method');
+    var text = req.param('text');
+    var best = req.param('best');
+    var ret = 'var useNodeJS = true;';
+
+    if(method=='parse') {
+	ret = {
+	    method: method,
+	    event: "result",
+	    text: text,
+	    morpheme: tagger.parse(text)
+	};
+    } else if(method=='wakati') {
+	ret = {
+	    method: method,
+	    event: "result",
+	    text: text,
+	    morpheme: tagger.wakati(text)
+	};
+    } else if(method=='parseNBest') {
+	ret = {
+	    method: method,
+	    event: "result",
+	    text: text,
+	    morpheme: tagger.parseNBest(text, best)
+	};
+    }
+    res.send(ret);
+}
+
+app.get('/igo', igo_parse);
+app.post('/igo', igo_parse);
+
 var port = process.env.PORT || 3000;
 app.listen(port);

@@ -1,4 +1,9 @@
-var igo = typeof exports === 'undefined' ? {} : exports;
+if(typeof exports === 'undefined') {
+    igo = {};
+} else {
+    igo = exports;
+    jsheap = igo.jsheap;
+}
 
 //形態素クラス
 igo.Morpheme = function(surface, feature, start) {
