@@ -1,0 +1,3 @@
+[submodule "lib/jsheap"]
+	path = lib/jsheap
+	url = https://github.com/shogo82148/jsheap.git

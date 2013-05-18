@@ -1,4 +1,4 @@
-LIB = lib/jsheap.js
+LIB = lib/jsheap/jsheap.js
 SRC = src/tagger.js src/dictionary.js src/trie.js src/util.js;
 
 all: build/igo.js

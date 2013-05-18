@@ -4,7 +4,7 @@ var fs = require('fs');
 var jsp = require("./uglify-js").parser;
 var pro = require("./uglify-js").uglify;
 
-var liblist = ["jsheap.js"];
+var liblist = ["jsheap/jsheap.js"];
 var srclist = ["tagger.js", "dictionary.js", "trie.js", "util.js"];
 
 var orig_code = "";
