@@ -8,10 +8,13 @@ var liblist = ["jsheap.js"];
 var srclist = ["tagger.js", "dictionary.js", "trie.js", "util.js"];
 
 var orig_code = "";
-for(var i=0;i<liblist.length;++i) {
+var i;
+for(i = 0; i < liblist.length; ++i) {
+    orig_code += '\n\n\n/********** lib/' + liblist[i] + ' **********/\n';
     orig_code += fs.readFileSync('../lib/' + liblist[i], 'utf-8');
 }
-for(var i=0;i<srclist.length;++i) {
+for(i = 0; i < srclist.length; ++i) {
+    orig_code += '\n\n\n/********** src/' + srclist[i] + ' **********/\n';
     orig_code += fs.readFileSync('../src/' + srclist[i], 'utf-8');
 }
 
@@ -23,4 +26,5 @@ function minify(orig_code) {
     return final_code;
 }
 
+fs.writeFileSync('./igo.js', orig_code);
 fs.writeFileSync('./igo.min.js', minify(orig_code));
