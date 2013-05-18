@@ -149,7 +149,7 @@ igo.ArrayBufferStream.prototype = {
 	var array = new igo.CharArray(this.buffer, this.pos, elementCount, this.bigendian);
 	var s = '';
 	for(var i=0; i<elementCount; i++) {
-	    s += String.fromCharCode(array[i]);
+	    s += String.fromCharCode(array.get(i));
 	}
 	this.pos += elementCount*2;
 	return s;
