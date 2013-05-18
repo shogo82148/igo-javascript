@@ -17,7 +17,7 @@ $(function() {
             }
             $('#result').html(result);
         } else if(data.event=="error") {
-            $('#result').text('エラー発生');
+            $('#loading').text('エラー発生');
         }
     }
 
@@ -38,10 +38,14 @@ $(function() {
         var BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.BlobBuilder;
         var worker = new Worker('web.js');
         igo.getServerFileToArrayBufffer("ipadic.zip", function(buffer) {
-            event({event: 'downloaded'});
-            var bb = new BlobBuilder();
-            bb.append(buffer);
-            worker.postMessage({method: 'setdic', dic: bb.getBlob()});
+            try {
+                event({event: 'downloaded'});
+                var blob = new Blob([new Uint8Array(buffer)]);
+                worker.postMessage({method: 'setdic', dic: blob});
+            } catch(e) {
+                console.error(e.toString());
+                event({event:"error"});
+            }
 	});
         post = function(data) {
             worker.postMessage(data);
