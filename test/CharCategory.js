@@ -57,7 +57,18 @@ describe("CharCategory", function() {
     });
 
     describe(".isCompatible", function() {
-        it('should parse array as little endian', function() {
+        it('should return true', function() {
+            category.isCompatible('A', 'B').should.be.true;
+            category.isCompatible('あ', 'い').should.be.true;
+            category.isCompatible('漢', '字').should.be.true;
+            category.isCompatible('一', '二').should.be.true;
+            category.isCompatible('一', '漢').should.be.true;
+        });
+
+        it('should return false', function() {
+            category.isCompatible('A', 'あ').should.be.false;
+            category.isCompatible('あ', '漢').should.be.false;
+            category.isCompatible('あ', '一').should.be.false;
         });
     });
 
