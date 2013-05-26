@@ -611,7 +611,7 @@ igo.Searcher.prototype = {
 //urlからArrayBufferを読み取って返す
 igo.getServerFileToArrayBufffer = function (url, successCallback) {
     var xhr = new XMLHttpRequest();
-    
+
     xhr.onreadystatechange = function () {
 	if (xhr.readyState == xhr.DONE) {
 	    if ((xhr.status==200 || xhr.status==304) && xhr.response) {
@@ -622,14 +622,14 @@ igo.getServerFileToArrayBufffer = function (url, successCallback) {
 	    }
 	}
     };
-    
+
     // 指定された URL へのリクエストを作成
     xhr.open("GET", url, true);
-    
+
     // ArrayBuffer オブジェクトでの応答を得るため、responseType を 'arraybuffer' に設定
     xhr.responseType = "arraybuffer";
     xhr.send();
-    
+
     return xhr;
 };
 
@@ -642,6 +642,11 @@ igo.IntArray = function (buffer, pos, elementCount, bigendian) {
 };
 
 igo.IntArray.readUInt = function(buffer, pos, bigendian) {
+    var result = igo.IntArray.readInt(buffer, pos, bigendian);
+    return result >>> 0;
+};
+
+igo.IntArray.readInt = function(buffer, pos, bigendian) {
     var result = 0;
     if(bigendian) {
 	result = (buffer[pos] << 24) |
@@ -653,14 +658,6 @@ igo.IntArray.readUInt = function(buffer, pos, bigendian) {
 	    (buffer[pos+2] << 16) |
 	    (buffer[pos+1] << 8) |
 	    (buffer[pos]);
-    }
-    return result;
-};
-
-igo.IntArray.readInt = function(buffer, pos, bigendian) {
-    var result = igo.IntArray.readUInt(buffer, pos, bigendian);
-    if(result>=0x80000000) {
-	result -= 0x100000000;
     }
     return result;
 };
@@ -739,35 +736,35 @@ igo.ArrayBufferStream.prototype = {
 	this.pos += 4;
 	return result;
     },
-    
+
     getIntArray: function(elementCount) {
 	var array = new igo.IntArray(this.buffer, this.pos, elementCount, this.bigendian);
 	this.pos += elementCount*4;
 	return array;
     },
-    
+
     getShortArray: function(elementCount) {
 	var array = new igo.ShortArray(this.buffer, this.pos, elementCount, this.bigendian);
 	this.pos += elementCount*2;
 	return array;
     },
-    
+
     getCharArray: function(elementCount) {
 	var array = new igo.CharArray(this.buffer, this.pos, elementCount, this.bigendian);
 	this.pos += elementCount*2;
 	return array;
     },
-    
+
     getString: function(elementCount) {
 	var array = new igo.CharArray(this.buffer, this.pos, elementCount, this.bigendian);
 	var s = '';
 	for(var i=0; i<elementCount; i++) {
-	    s += String.fromCharCode(array[i]);
+	    s += String.fromCharCode(array.get(i));
 	}
 	this.pos += elementCount*2;
 	return s;
     },
-    
+
     size: function() {
 	return this.buffer.length;
     }
