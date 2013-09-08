@@ -20,3 +20,5 @@ function loadTagger(dicdir) {
 var tagger = loadTagger('./ipadic');
 
 console.log(tagger.wakati('node.jsで形態素解析をしてみるテスト'));
+console.log(tagger.parse('node.jsで形態素解析をしてみるテスト'));
+console.log(tagger.parseNBest('node.jsで形態素解析をしてみるテスト', 5));

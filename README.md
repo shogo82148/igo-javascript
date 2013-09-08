@@ -7,7 +7,7 @@ igo-javascript: Morphological analyzer for Javascript
 Javaで書かれた形態素解析器[Igo](http://igo.sourceforge.jp/)のJavascript移植版です。
 ブラウザ上で、Node.jsで、日本語の形態素解析を行うことができます。
 
-# とりあえず試してみる
+## とりあえず試してみる
 
 [GitHub Pages](http://shogo82148.github.io/igo-javascript/)で試すことができます。
 
@@ -55,5 +55,12 @@ function loadTagger(dicdir) {
 
 var tagger = loadTagger('./ipadic');
 
+// 分かち書きだけする
 console.log(tagger.wakati('node.jsで形態素解析をしてみるテスト'));
+
+// 品詞情報も一緒に取得する
+console.log(tagger.parse('node.jsで形態素解析をしてみるテスト'));
+
+// NBest解を取得する(igo-javascript独自拡張)
+console.log(tagger.parseNBest('node.jsで形態素解析をしてみるテスト', 5));
 ```
