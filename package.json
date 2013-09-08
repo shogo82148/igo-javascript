@@ -5,5 +5,8 @@
         "express": "latest",
         "mocha": "latest",
         "should": "latest"
+    },
+    "scripts": {
+        "test": "./node_modules/.bin/mocha"
     }
 }
