@@ -1,6 +1,15 @@
 {
-    "name": "shogo8214-test",
+    "name": "igo-javascript",
+    "description": "Morphological analyzer for Javascript",
     "version": "0.0.1",
+    "author": "Ichinose Shogo <shogo82148@gmail.com>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/shogo82148/igo-javascript.git"
+    },
+    "bugs": {
+        "url": "https://github.com/shogo82148/igo-javascript/issues"
+    },
     "dependencies": {
         "express": "latest",
         "mocha": "latest",
@@ -8,5 +17,6 @@
     },
     "scripts": {
         "test": "./node_modules/.bin/mocha"
-    }
+    },
+    "license": "MIT"
 }
