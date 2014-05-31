@@ -120,7 +120,7 @@ igo.WordDic = function(word2id, worddat, wordary, wordinf, bigendian) {
     this.rightIds = fmis.getShortArray(wordCount);
 
     //consts[単語ID] = 単語のコスト
-    this.costs = fmis.getCharArray(wordCount);
+    this.costs = fmis.getShortArray(wordCount);
 };
 
 igo.WordDic.prototype = {
