@@ -340,11 +340,11 @@ igo.Unknown.prototype.search = function(text, start, wdic, callback) {
     var ct = category.category(ch);
     var length = text.length;
     var i;
-    
+
     if(!callback.isEmpty() && !ct.invoke) {
 	return ;
     }
-    
+
     var isSpace = ct.id == this.spaceId;
     var limit = Math.min(length, ct.length + start);
     for(i=start; i<limit; i++) {
@@ -354,7 +354,7 @@ igo.Unknown.prototype.search = function(text, start, wdic, callback) {
 	    return;
 	}
     }
-    
+
     if(ct.group && limit < length) {
 	for(i=limit; i<length; i++) {
 	    if(!category.isCompatible(ch, text[i])) {
@@ -383,21 +383,21 @@ igo.WordDic = function(word2id, worddat, wordary, wordinf, bigendian) {
     this.trie = new igo.Searcher(word2id, bigendian);
     this.data = igo.getCharArray(worddat, bigendian);
     this.indices = igo.getIntArray(wordary, bigendian);
-    
+
     var fmis = new igo.ArrayBufferStream(wordinf, bigendian);
     var wordCount = fmis.size() / (4 + 2 + 2 + 2);
-    
+
     //dataOffsets[単語ID] = 単語の素性データの開始位置
     this.dataOffsets = fmis.getIntArray(wordCount);
-    
+
     //leftIds[単語ID] = 単語の左文脈ID
     this.leftIds = fmis.getShortArray(wordCount);
-    
+
     //rightIds[単語ID] = 単語の右文脈ID
     this.rightIds = fmis.getShortArray(wordCount);
-    
+
     //consts[単語ID] = 単語のコスト
-    this.costs = fmis.getCharArray(wordCount);
+    this.costs = fmis.getShortArray(wordCount);
 };
 
 igo.WordDic.prototype = {
@@ -406,7 +406,7 @@ igo.WordDic.prototype = {
 	var leftIds = this.leftIds;
 	var rightIds = this.rightIds;
 	var indices = this.indices;
-	
+
 	function fn(start, offset, trieId) {
 	    var end = indices.get(trieId + 1);
 	    for(var i=indices.get(trieId); i<end; i++) {
@@ -416,7 +416,7 @@ igo.WordDic.prototype = {
 	}
 	this.trie.eachCommonPrefix(text, start, fn);
     },
-    
+
     searchFromTrieId: function(trieId, start, wordLength, isSpace, callback) {
 	var costs = this.costs;
 	var leftIds = this.leftIds;
@@ -427,7 +427,7 @@ igo.WordDic.prototype = {
 					 leftIds.get(i), rightIds.get(i), isSpace));
 	}
     },
-    
+
     wordData: function(wordId) {
 	var res = Array();
 	var start = this.dataOffsets.get(wordId);
@@ -438,7 +438,6 @@ igo.WordDic.prototype = {
 	return res;
     }
 };
-
 
 
 
