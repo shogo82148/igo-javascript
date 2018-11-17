@@ -4,12 +4,12 @@ igo-javascript: Morphological analyzer for Javascript
 [![Build Status](https://api.travis-ci.org/shogo82148/igo-javascript.png)](https://api.travis-ci.org/shogo82148/igo-javascript)
 
 ## これは何？
-Javaで書かれた形態素解析器[Igo](http://igo.sourceforge.jp/)のJavascript移植版です。
+Javaで書かれた形態素解析器[Igo](https://igo.sourceforge.jp/)のJavascript移植版です。
 ブラウザ上で、Node.jsで、日本語の形態素解析を行うことができます。
 
 ## とりあえず試してみる
 
-[GitHub Pages](http://shogo82148.github.io/igo-javascript/)で試すことができます。
+[GitHub Pages](https://shogo82148.github.io/igo-javascript/)で試すことができます。
 
 ## インストール
 ブラウザ上で実行する場合は、
@@ -25,8 +25,8 @@ npmとかには登録してないので、レポジトリの`./build/igo.js`か`
 ### 辞書を作る
 igo-javascriptを動作させるにはバイナリ辞書が必要ですが、
 igo-javascript自身にはバイナリ辞書を作る機能はありません。
-Java版の[Igo](http://igo.sourceforge.jp/)で作成したバイナリ辞書をそのまま使用します。
-作成方法は[Igo](http://igo.sourceforge.jp/)のページを参照してください。
+Java版の[Igo](https://igo.sourceforge.jp/)で作成したバイナリ辞書をそのまま使用します。
+作成方法は[Igo](https://igo.sourceforge.jp/)のページを参照してください。
 
 ### 解析する
 
